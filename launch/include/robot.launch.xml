@@ -1,0 +1,105 @@
+<launch>
+  <arg name="initial_pose_x"/>
+  <arg name="initial_pose_y"/>
+  <arg name="initial_pose_z"/>
+  <arg name="initial_pose_yaw"/>
+  <arg name="robot_name"/>
+
+  <arg name="init_pose" value="-x $(arg initial_pose_x) -y $(arg initial_pose_y) -z $(arg initial_pose_z) -Y $(arg initial_pose_yaw)" />
+
+  <arg name="base" value="$(optenv TURTLEBOT_BASE kobuki)"/> <!--kobuki(hexagons) create(circles), roomba -->
+  <arg name="battery" value="$(optenv TURTLEBOT_BATTERY /proc/acpi/battery/BAT0)"/> <!-- /proc/acpi/battery/BAT0 -->
+  <arg name="stacks" value="$(optenv TURTLEBOT_STACKS hexagons)"/> <!-- circles, hexagons -->
+  <arg name="3d_sensor" value="$(optenv TURTLEBOT_3D_SENSOR kinect)"/> <!-- kinect, asus_xtion_pro -->
+
+  <arg name="urdf_file" default="$(find xacro)/xacro.py '$(find kinopy_description)/robots/$(arg base)_$(arg stacks)_$(arg 3d_sensor).urdf.xacro' prefix:=$(arg robot_name)" />
+  <param name="robot_description" command="$(arg urdf_file)" />
+
+  <!-- Gazebo model spawner -->
+  <node name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model" args="$(arg init_pose) -unpause -urdf -param robot_description -model $(arg robot_name)" respawn="false" output="screen"/>
+
+  <!-- Velocity mux nodelet -->
+  <node pkg="nodelet" type="nodelet" name="mobile_base_nodelet_manager" args="manager"/>
+  <node pkg="nodelet" type="nodelet" name="cmd_vel_mux"
+        args="load yocs_cmd_vel_mux/CmdVelMuxNodelet mobile_base_nodelet_manager">
+    <param name="yaml_cfg_file" value="$(find turtlebot_bringup)/param/mux.yaml" />
+    <remap from="cmd_vel_mux/output" to="mobile_base/commands/velocity"/>
+  </node>
+
+  <!-- bumper2pc.launch.xml -->
+  <node pkg="nodelet" type="nodelet" name="bumper2pointcloud" args="load kobuki_bumper2pc/Bumper2PcNodelet nodelet_manager">
+    <param name="pointcloud_radius" value="0.24"/>
+    <remap from="bumper2pointcloud/pointcloud"   to="sensors/bumper_pointcloud"/>
+    <remap from="bumper2pointcloud/core_sensors" to="sensors/core"/>
+  </node>
+
+  <!-- Robot State Publisher -->
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+    <param name="publish_frequency" type="double" value="30.0" />
+    <param name="tf_prefix" type="string" value="$(arg robot_name)" />
+  </node>
+
+  <arg name="min_range" default="0.45" />
+  <!-- fake laser -->
+  <node pkg="nodelet" type="nodelet" name="laserscan_nodelet_manager" args="manager"/>
+  <node pkg="nodelet" type="nodelet" name="depthimage_to_laserscan"
+        args="load depthimage_to_laserscan/DepthImageToLaserScanNodelet laserscan_nodelet_manager">
+    <param name="scan_height" value="3"/>
+    <param name="output_frame_id" value="$(arg robot_name)/camera_depth_frame"/>
+    <param name="range_min" value="$(arg min_range)"/>
+    <remap from="image" to="camera/depth/image_raw"/>
+    <remap from="scan" to="scan"/>
+  </node>
+
+
+  <!--
+    Convert laser scan to 3D point cloud into fixed frame not rotating along with sensor.
+    Also performs scan shadow point filtering
+  -->
+  <!--
+  <node pkg="hector_laserscan_to_pointcloud" type="laserscan_to_pointcloud_node" name="scan_to_ptcld" respawn="true" output="screen">
+    <param name="min_range" value="$(arg min_range)" />
+    <param name="use_high_fidelity_projection" value="true" />
+    <param name="target_frame" value="/$(arg robot_name)/odom" />
+    <rosparam command="load" file="$(find hector_laserscan_to_pointcloud)/config/default_scan_shadow_filter.yaml" />
+  </node>
+  -->
+
+  <!-- Velocity smoother -->
+  <node pkg="nodelet" type="nodelet" name="navigation_velocity_smoother"
+	args="load yocs_velocity_smoother/VelocitySmootherNodelet mobile_base_nodelet_manager">
+    <rosparam file="$(find turtlebot_bringup)/param/defaults/smoother.yaml" command="load"/>
+    <remap from="navigation_velocity_smoother/smooth_cmd_vel" to="cmd_vel_mux/input/navi"/>
+    <remap from="navigation_velocity_smoother/odometry" to="odom"/>
+    <remap from="navigation_velocity_smoother/robot_cmd_vel" to="mobile_base/commands/velocity"/>
+  </node>
+
+  <!-- Safety controller -->
+  <node pkg="nodelet" type="nodelet" name="kobuki_safety_controller"
+	args="load kobuki_safety_controller/SafetyControllerNodelet nodelet_manager">
+    <remap from="kobuki_safety_controller/cmd_vel" to="cmd_vel_mux/input/safety_controller"/>
+    <remap from="kobuki_safety_controller/events/bumper" to="events/bumper"/>
+    <remap from="kobuki_safety_controller/events/cliff" to="events/cliff"/>
+    <remap from="kobuki_safety_controller/events/wheel_drop" to="events/wheel_drop"/>
+  </node>
+
+  <!-- The odometry estimator, throttling, fake laser etc. go here -->
+  <!-- All the stuff as from usual robot launch file -->
+  <include file="$(find multi_robot_system)/launch/include/move_base.launch.xml" >
+    <arg name="robot_name" value="$(arg robot_name)" />
+    <arg name="init_pose" value="$(arg init_pose)" />
+  </include>
+
+  <!--AMCL-->
+  <include file="$(find multi_robot_system)/launch/include/amcl.launch.xml">
+    <arg name="initial_pose_x" value="$(arg initial_pose_x)"/>
+    <arg name="initial_pose_y" value="$(arg initial_pose_y)"/>
+    <arg name="initial_pose_a" value="$(arg initial_pose_yaw)"/>
+    <arg name="odom_frame_id" value="/$(arg robot_name)/odom"/>
+    <arg name="base_frame_id" value="/$(arg robot_name)/base_footprint"/>
+    <arg name="scan_topic"    value="/$(arg robot_name)/scan"/>
+  </include>
+
+  <!--Load agent parameters-->
+  <rosparam file="$(find multi_robot_system)/param/agent_params.yaml" command="load"/>
+</launch>

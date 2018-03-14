@@ -1,0 +1,27 @@
+<launch>
+  <arg name="robot_name"/>
+  <arg name="init_pose"/>
+
+  <!-- Define your move_base node -->
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <rosparam file="$(find multi_robot_system)/param/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find multi_robot_system)/param/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find multi_robot_system)/param/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find multi_robot_system)/param/global_costmap_params.yaml" command="load" />
+    <rosparam file="$(find multi_robot_system)/param/move_base_params.yaml" command="load" />
+    <rosparam file="$(find multi_robot_system)/param/base_local_planner_params.yaml" command="load"/>
+    <param name="local_costmap/robot_base_frame" value="/$(arg robot_name)/base_footprint"/>
+    <param name="global_costmap/robot_base_frame" value="/$(arg robot_name)/base_footprint"/>
+    <param name="local_costmap/point_cloud_sensor/topic" value="/$(arg robot_name)/camera/depth/points"/>
+    <param name="global_costmap/point_cloud_sensor/topic" value="/$(arg robot_name)/camera/depth/points"/>
+    <param name="local_costmap/point_cloud_sensor/sensor_frame" value="/$(arg robot_name)/camera_depth_frame"/>
+    <param name="global_costmap/point_cloud_sensor/sensor_frame" value="/$(arg robot_name)/camera_depth_frame"/>
+    <param name="local_costmap/scan/sensor_frame" value="/$(arg robot_name)/camera_depth_frame"/>
+    <param name="global_costmap/scan/sensor_frame" value="/$(arg robot_name)/camera_depth_frame"/>
+    <param name="local_costmap/scan/topic" value="/$(arg robot_name)/scan"/>
+    <param name="global_costmap/scan/topic" value="/$(arg robot_name)/scan"/>
+    <remap from="odom" to="odom"/>
+    <remap from="map" to="/map"/>
+    <remap from="cmd_vel" to="navigation_velocity_smoother/raw_cmd_vel"/>
+  </node>
+</launch>

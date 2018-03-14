@@ -1,0 +1,43 @@
+#agent_hjh_lab:
+  holo_robot: false
+  wheel_base: 0.25
+  
+  max_vel_x: 0.5
+  max_vel_th: 1.5
+  min_vel_x: 0.05
+  min_vel_th: 0.1
+  min_vel_y: 0.0
+  max_vel_y: 0.0
+  min_vel_th_inplace: 0.5
+  acc_lim_x: 5.0
+  acc_lim_y: 5.0
+  acc_lim_th: 5.2
+
+  max_vel_with_obstacles: 0.5
+
+  footprint_radius: 0.17
+
+  base_frame: /base_link
+  global_frame: /map
+
+  time_to_holo: 0.4
+  min_error_holo: 0.02
+  max_error_holo: 0.10
+
+  eps: 0.1
+
+  type_vo: 0 #HRVO = 0, RVO = 1, VO = 2
+  orca: true #orca or VO
+  convex: true #footprint or radius
+  use_truncation: true #truncate vos
+  trunc_time: 10.0
+
+  publish_positions_frequency: 10.0
+  publish_me_frequency: 20.0
+  controller_frequency: 20.0
+
+
+
+
+
+
