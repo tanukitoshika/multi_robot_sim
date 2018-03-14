@@ -12,18 +12,18 @@
   <node name="gazebo_gui" pkg="gazebo_ros" type="gzclient" respawn="false" output="screen"/>
 
   <!-- Rviz -->
-  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find multi_robot_system)/rviz/agents.rviz"
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find multi_robot_sim)/rviz/agents.rviz"
   output="screen" />
 
   <group ns="robot1">
-  <include file="$(find multi_robot_system)/launch/include/move_base.launch.xml" >
+  <include file="$(find multi_robot_sim)/launch/include/move_base.launch.xml" >
     <arg name="robot_name" value="robot1" />
     <arg name="init_pose" value="-x 1 -y 1 -z 0 -Y 3.1415926" />
   </include>
   </group>
 
   <group ns="robot2">
-  <include file="$(find multi_robot_system)/launch/include/move_base.launch.xml" >
+  <include file="$(find multi_robot_sim)/launch/include/move_base.launch.xml" >
     <arg name="robot_name" value="robot2" />
     <arg name="init_pose" value="-x -1 -y 1 -z 0 -Y 0" />
   </include>

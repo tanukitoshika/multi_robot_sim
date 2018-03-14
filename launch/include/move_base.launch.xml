@@ -4,12 +4,12 @@
 
   <!-- Define your move_base node -->
   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
-    <rosparam file="$(find multi_robot_system)/param/costmap_common_params.yaml" command="load" ns="global_costmap" />
-    <rosparam file="$(find multi_robot_system)/param/costmap_common_params.yaml" command="load" ns="local_costmap" />
-    <rosparam file="$(find multi_robot_system)/param/local_costmap_params.yaml" command="load" />
-    <rosparam file="$(find multi_robot_system)/param/global_costmap_params.yaml" command="load" />
-    <rosparam file="$(find multi_robot_system)/param/move_base_params.yaml" command="load" />
-    <rosparam file="$(find multi_robot_system)/param/base_local_planner_params.yaml" command="load"/>
+    <rosparam file="$(find multi_robot_sim)/param/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find multi_robot_sim)/param/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find multi_robot_sim)/param/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find multi_robot_sim)/param/global_costmap_params.yaml" command="load" />
+    <rosparam file="$(find multi_robot_sim)/param/move_base_params.yaml" command="load" />
+    <rosparam file="$(find multi_robot_sim)/param/base_local_planner_params.yaml" command="load"/>
     <param name="local_costmap/robot_base_frame" value="/$(arg robot_name)/base_footprint"/>
     <param name="global_costmap/robot_base_frame" value="/$(arg robot_name)/base_footprint"/>
     <param name="local_costmap/point_cloud_sensor/topic" value="/$(arg robot_name)/camera/depth/points"/>
