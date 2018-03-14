@@ -4,9 +4,7 @@
   <arg name="gui" default="false"/>
 
   <!-- start world -->
-  <!--<node name="gazebo" pkg="gazebo" type="gazebo"
-   args="$(find multi_robot)/worlds/playground.world" respawn="false" output="screen" />-->
-  <include file="$(find kinopy_gzros)/launch/empty_world.launch">
+  <include file="$(find multi_robot_sim)/launch/empty_world.launch">
     <arg name="use_sim_time" value="true"/>
     <arg name="debug" value="false"/>
     <arg name="gui" value="$(arg gui)" />
@@ -23,11 +21,11 @@
   <!--<node name="gazebo_gui" pkg="gazebo" type="gui" respawn="false" output="screen"/>-->
 
   <!-- include our robots -->
-  <include file="$(find multi_robot_system)/launch/include/robots.launch.xml"/>
+  <include file="$(find multi_robot_sim)/launch/include/robots.launch.xml"/>
 
   <!-- Rviz -->
   <!--
-  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find multi_robot_system)/rviz/agents.rviz"
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find multi_robot_sim)/rviz/agents.rviz"
   output="screen" />
   -->
   <!-- Fake laser -->
