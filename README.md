@@ -6,9 +6,10 @@ This is for ros-kinetic.
 
 ## How to Use
 
+This package dependents on following packages:  
 `sudo apt install ros-kinetic-turtlebot*`  
 `sudo apt install ros-kinetic-joy*` 
- 
+
 To launch the package:  
 `roslaunch multi_robot_sim robots_gazebo_rviz.launch`
 
