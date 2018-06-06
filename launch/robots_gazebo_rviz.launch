@@ -1,6 +1,7 @@
 <launch>
   <param name="/use_sim_time" value="true"/>
-  <arg name="world_file"  default="$(env TURTLEBOT_GAZEBO_WORLD_FILE)"/>
+  <!-- <arg name="world_file"  default="$(env TURTLEBOT_GAZEBO_WORLD_FILE)"/> -->
+  <arg name="world_file"  default="$(find multi_robot_sim)/worlds/playground.world"/>
   <arg name="gui" default="true"/>
 
   <!-- start world -->
